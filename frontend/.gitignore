@@ -1,0 +1,42 @@
+# === Node and frontend dependencies ===
+node_modules/
+**/node_modules/
+
+# === Build outputs ===
+build/
+dist/
+out/
+**/build/
+
+# === Test coverage ===
+coverage/
+
+# === Environment variables ===
+.env
+.env.*
+!.env.example  # Keep a template in version control if needed
+
+# === Logs ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === IDEs and OS ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# === Exported files (PDF, Excel) ===
+*.xlsx
+*.xls
+*.pdf
+
+# === Cache and linting ===
+.cache/
+.eslintcache
+
+# === PnP (Yarn Plug’n’Play) ===
+.pnp/
+.pnp.js
