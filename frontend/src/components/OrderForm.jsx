@@ -1,183 +1,161 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import ExportButtons from './ExportButtons';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import suppliers from '../config/suppliers';
+import shops from '../config/shops';
+import { toast } from 'react-toastify';
 
 const OrderForm = () => {
-  const [form, setForm] = useState({
-    employee: '',
+  const { token, numeAngajat } = useAuth();
+
+  const [formData, setFormData] = useState({
     sku: '',
-    quantity: 1,
+    quantity: '',
     supplier: '',
     shop: '',
     buyOrder: ''
   });
 
-  const [shops] = useState([
-    'TNG-Outdoor',
-    'Piese-barca',
-    'Accesorii-barca',
-    'EMAG.ro',
-    'EMAG.bg',
-    'EMAG.hu',
-    'Comanda telefonica/email'
-  ]);
-  const [duplicateInfo, setDuplicateInfo] = useState(null);
-  const [confirmed, setConfirmed] = useState(false);
-
-  const debounceTimeout = useRef(null);
-
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (e.target.name === 'sku') {
-      setConfirmed(false);
-    }
-  };
-
-  const handleCheckDuplicate = async () => {
-    if (!form.sku) {
-      setDuplicateInfo(null);
-      return;
-    }
-    try {
-      const res = await axios.get(`http://localhost:5000/api/orders/check/${form.sku}`);
-      if (res.data.exists) {
-        setDuplicateInfo(res.data.data);
-      } else {
-        setDuplicateInfo(null);
-      }
-    } catch (error) {
-      console.error('Duplicate check failed:', error);
-      setDuplicateInfo(null);
-    }
-  };
-
-  useEffect(() => {
-    clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      handleCheckDuplicate();
-    }, 500);
-
-    return () => clearTimeout(debounceTimeout.current);
-  }, [form.sku]);
-
-  const validateForm = () => {
-    if (!form.sku.trim()) {
-      alert('SKU is required.');
-      return false;
-    }
-    if (!form.supplier.trim()) {
-      alert('Supplier is required.');
-      return false;
-    }
-    if (!form.quantity || form.quantity < 1) {
-      alert('Quantity must be 1 or greater.');
-      return false;
-    }
-    return true;
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
-    if (duplicateInfo && !confirmed) {
-      alert(
-        `SKU already exists.\nSupplier: ${duplicateInfo.supplier}\nQuantity: ${duplicateInfo.quantity}\n\nClick Submit again to confirm.`
-      );
-      setConfirmed(true);
-      return;
-    }
+    const order = {
+      ...formData,
+      employee: numeAngajat
+    };
 
     try {
-      await axios.post('http://localhost:5000/api/orders', form);
-      alert('✅ Order added successfully!');
-      setForm({
-        employee: '',
+      const res = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(order)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(`❌ Comanda eșuată: ${err.error}`);
+        return;
+      }
+
+      toast.success('✅ Comanda a fost trimisă cu succes');
+      setFormData({
         sku: '',
-        quantity: 1,
+        quantity: '',
         supplier: '',
         shop: '',
         buyOrder: ''
       });
-      setDuplicateInfo(null);
-      setConfirmed(false);
-    } catch (error) {
-      alert('Failed to add order.');
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      toast.error('❌ Eroare la trimiterea comenzii');
     }
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: 'auto' }}>
-      <ExportButtons />
-      <h2>Add Order</h2>
-      <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ maxWidth: 500, margin: '0 auto', padding: 20 }}>
+      <h2 style={{ fontSize: '1.5rem' }}>📦 Trimite Comandă</h2>
+
+      <div style={{ marginBottom: 15 }}>
+        <label>Angajat</label>
         <input
-          placeholder="Employee Name"
-          name="employee"
-          value={form.employee}
-          onChange={handleChange}
+          type="text"
+          value={numeAngajat || ''}
+          readOnly
+          style={{ width: '100%', padding: 10 }}
         />
+      </div>
+
+      <div style={{ marginBottom: 15 }}>
+        <label>SKU</label>
         <input
-          required
-          placeholder="SKU"
+          type="text"
           name="sku"
-          value={form.sku}
+          value={formData.sku}
           onChange={handleChange}
+          required
+          style={{ width: '100%', padding: 10 }}
         />
+      </div>
+
+      <div style={{ marginBottom: 15 }}>
+        <label>Cantitate</label>
         <input
           type="number"
-          min="1"
-          required
           name="quantity"
-          placeholder="Quantity"
-          value={form.quantity}
+          value={formData.quantity}
           onChange={handleChange}
-        />
-
-        <select
           required
-          name="supplier"
-          value={form.supplier}
-          onChange={handleChange}
-        >
-          <option value="">Select Supplier</option>
-          {suppliers.map((s, i) => (
-            <option key={i} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-
-        <select name="shop" value={form.shop} onChange={handleChange}>
-          <option value="">Select Shop (optional)</option>
-          {shops.map((s, i) => (
-            <option key={i} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-
-        <input
-          placeholder="Buy Order Code"
-          name="buyOrder"
-          value={form.buyOrder}
-          onChange={handleChange}
+          style={{ width: '100%', padding: 10 }}
         />
+      </div>
 
-        <button type="submit">Submit</button>
-      </form>
+      <div style={{ marginBottom: 15 }}>
+        <label>Furnizor</label>
+        <select
+          name="supplier"
+          value={formData.supplier}
+          onChange={handleChange}
+          required
+          style={{ width: '100%', padding: 10 }}
+        >
+          <option value="">-- Selectează furnizor --</option>
+          {suppliers.map((s, i) => (
+            <option key={i} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
 
-      {duplicateInfo && !confirmed && (
-        <div style={{ color: 'red', marginTop: 10 }}>
-          SKU already exists — Supplier: {duplicateInfo.supplier}, Qty: {duplicateInfo.quantity}
-          <br />
-          Click submit again to confirm.
-        </div>
-      )}
-    </div>
+      <div style={{ marginBottom: 15 }}>
+        <label>Magazin</label>
+        <select
+          name="shop"
+          value={formData.shop}
+          onChange={handleChange}
+          style={{ width: '100%', padding: 10 }}
+        >
+          <option value="">-- Selectează magazin --</option>
+          {shops.map((s, i) => (
+            <option key={i} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+
+      <div style={{ marginBottom: 15 }}>
+        <label>Buy Order</label>
+        <input
+          type="text"
+          name="buyOrder"
+          value={formData.buyOrder}
+          onChange={handleChange}
+          style={{ width: '100%', padding: 10 }}
+        />
+      </div>
+
+      <button
+        type="submit"
+        style={{
+          width: '100%',
+          padding: '12px',
+          fontSize: '1rem',
+          backgroundColor: '#007BFF',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 5,
+          cursor: 'pointer'
+        }}
+      >
+        Trimite Comanda
+      </button>
+    </form>
   );
 };
 

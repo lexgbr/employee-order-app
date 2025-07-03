@@ -1,3 +1,2 @@
-const suppliers = ['Osculati', 'GFN']; // Same list as your form
-
-export default suppliers;
+// config/suppliers.js
+export default ['Osculati', 'GFN', 'OtherSupplier'];
