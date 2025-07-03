@@ -16,21 +16,14 @@ const ExportButtons = () => {
       return res.data;
     } catch (err) {
       toast.error('❌ Nu s-au putut prelua comenzile pentru export.');
-      console.error(err);
       return [];
     }
   };
 
   const exportToExcel = async () => {
-    if (!selectedSupplier) {
-      toast.error('❌ Selectează un furnizor înainte de export.');
-      return;
-    }
+    if (!selectedSupplier) return toast.error('❌ Selectează un furnizor.');
     const orders = await fetchOrders(selectedSupplier);
-    if (orders.length === 0) {
-      toast.warn('⚠️ Nu există comenzi pentru export.');
-      return;
-    }
+    if (orders.length === 0) return toast.warn('⚠️ Nu există comenzi.');
 
     const worksheet = XLSX.utils.json_to_sheet(orders);
     const workbook = XLSX.utils.book_new();
@@ -38,24 +31,16 @@ const ExportButtons = () => {
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(blob, `orders_${selectedSupplier}.xlsx`);
-    toast.success('📊 Excel exportat cu succes!');
+    toast.success('📊 Export Excel complet realizat.');
   };
 
   const exportToPDF = async () => {
-    if (!selectedSupplier) {
-      toast.error('❌ Selectează un furnizor înainte de export.');
-      return;
-    }
-
+    if (!selectedSupplier) return toast.error('❌ Selectează un furnizor.');
     const orders = await fetchOrders(selectedSupplier);
-    if (orders.length === 0) {
-      toast.warn('⚠️ Nu există comenzi pentru export.');
-      return;
-    }
+    if (orders.length === 0) return toast.warn('⚠️ Nu există comenzi.');
 
     const doc = new jsPDF();
     doc.text(`Order List for ${selectedSupplier}`, 14, 15);
-
     autoTable(doc, {
       startY: 20,
       head: [['Employee', 'SKU', 'Qty', 'Supplier', 'Shop', 'Buy Order', 'Date']],
@@ -69,9 +54,27 @@ const ExportButtons = () => {
         new Date(order.timestamp || order.createdAt).toLocaleString(),
       ]),
     });
-
     doc.save(`orders_${selectedSupplier}.pdf`);
-    toast.success('📄 PDF exportat cu succes!');
+    toast.success('📄 Export PDF complet realizat.');
+  };
+
+  const exportQuickExcel = async () => {
+    if (!selectedSupplier) return toast.error('❌ Selectează un furnizor.');
+    const orders = await fetchOrders(selectedSupplier);
+    if (orders.length === 0) return toast.warn('⚠️ Nu există comenzi.');
+
+    const simplified = orders.map(o => ({
+      SKU: o.sku,
+      Cantitate: o.quantity
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(simplified);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Comanda');
+    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([buffer], { type: 'application/octet-stream' });
+    saveAs(blob, `comanda_${selectedSupplier}.xlsx`);
+    toast.success('📦 Excel simplificat pentru comandă generat.');
   };
 
   return (
@@ -90,21 +93,17 @@ const ExportButtons = () => {
         </select>
       </label>
 
-      <button
-        onClick={exportToPDF}
-        style={{ marginLeft: 10, padding: '8px 12px', fontSize: '1rem' }}
-        disabled={!selectedSupplier}
-      >
-        📄 Export PDF
-      </button>
-
-      <button
-        onClick={exportToExcel}
-        style={{ marginLeft: 10, padding: '8px 12px', fontSize: '1rem' }}
-        disabled={!selectedSupplier}
-      >
-        📊 Export Excel
-      </button>
+      <div style={{ marginTop: 10 }}>
+        <button onClick={exportToPDF} style={{ marginRight: 10 }}>
+          📄 Export PDF pentru a vedea lista curenta
+        </button>
+        <button onClick={exportToExcel} style={{ marginRight: 10 }}>
+          📊 Export Excel pentru a vedea lista curenta
+        </button>
+        <button onClick={exportQuickExcel}>
+          ⚡ Exportă în Excel pentru a comanda
+        </button>
+      </div>
     </div>
   );
 };
