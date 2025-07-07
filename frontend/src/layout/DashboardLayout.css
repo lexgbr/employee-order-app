@@ -1,0 +1,85 @@
+.dashboard {
+  font-family: 'Inter', sans-serif;
+  background: transparent;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  color: white;
+  padding: 1rem;
+  position: relative;
+}
+
+.dashboard-header-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.logout-button {
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  background-color: white;
+  color: #007BFF;
+  font-weight: bold;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dashboard-logo {
+  height: 40px;
+  filter: brightness(0) invert(1);
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dashboard-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.dashboard-nav span {
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  background-color: transparent;
+}
+
+.dashboard-nav span.active {
+  background-color: white;
+  color: #007BFF;
+  font-weight: bold;
+}
+
+.dashboard-main {
+  padding: 2rem;
+  background: transparent;
+  z-index: 1;
+}
