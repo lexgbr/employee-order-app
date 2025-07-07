@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import suppliers from '../config/suppliers';
 import shops from '../config/shops';
 import { toast } from 'react-toastify';
+import '../components/Form.css';
 
 const OrderForm = () => {
   const { token, numeAngajat } = useAuth();
@@ -61,52 +62,27 @@ const OrderForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 500, margin: '0 auto', padding: 20 }}>
-      <h2 style={{ fontSize: '1.5rem' }}>📦 Trimite Comandă</h2>
+    <form onSubmit={handleSubmit} className="form-container">
+      <h2 className="form-title">📦 Trimite Comandă</h2>
 
-      <div style={{ marginBottom: 15 }}>
+      <div className="form-group">
         <label>Angajat</label>
-        <input
-          type="text"
-          value={numeAngajat || ''}
-          readOnly
-          style={{ width: '100%', padding: 10 }}
-        />
+        <input type="text" value={numeAngajat || ''} readOnly className="input-full" />
       </div>
 
-      <div style={{ marginBottom: 15 }}>
+      <div className="form-group">
         <label>SKU</label>
-        <input
-          type="text"
-          name="sku"
-          value={formData.sku}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', padding: 10 }}
-        />
+        <input type="text" name="sku" value={formData.sku} onChange={handleChange} required className="input-full" />
       </div>
 
-      <div style={{ marginBottom: 15 }}>
+      <div className="form-group">
         <label>Cantitate</label>
-        <input
-          type="number"
-          name="quantity"
-          value={formData.quantity}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', padding: 10 }}
-        />
+        <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} required className="input-full" />
       </div>
 
-      <div style={{ marginBottom: 15 }}>
+      <div className="form-group">
         <label>Furnizor</label>
-        <select
-          name="supplier"
-          value={formData.supplier}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', padding: 10 }}
-        >
+        <select name="supplier" value={formData.supplier} onChange={handleChange} required className="input-full">
           <option value="">-- Selectează furnizor --</option>
           {suppliers.map((s, i) => (
             <option key={i} value={s}>{s}</option>
@@ -114,14 +90,9 @@ const OrderForm = () => {
         </select>
       </div>
 
-      <div style={{ marginBottom: 15 }}>
+      <div className="form-group">
         <label>Magazin</label>
-        <select
-          name="shop"
-          value={formData.shop}
-          onChange={handleChange}
-          style={{ width: '100%', padding: 10 }}
-        >
+        <select name="shop" value={formData.shop} onChange={handleChange} className="input-full">
           <option value="">-- Selectează magazin --</option>
           {shops.map((s, i) => (
             <option key={i} value={s}>{s}</option>
@@ -129,32 +100,12 @@ const OrderForm = () => {
         </select>
       </div>
 
-      <div style={{ marginBottom: 15 }}>
+      <div className="form-group">
         <label>Buy Order</label>
-        <input
-          type="text"
-          name="buyOrder"
-          value={formData.buyOrder}
-          onChange={handleChange}
-          style={{ width: '100%', padding: 10 }}
-        />
+        <input type="text" name="buyOrder" value={formData.buyOrder} onChange={handleChange} className="input-full" />
       </div>
 
-      <button
-        type="submit"
-        style={{
-          width: '100%',
-          padding: '12px',
-          fontSize: '1rem',
-          backgroundColor: '#007BFF',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 5,
-          cursor: 'pointer'
-        }}
-      >
-        Trimite Comanda
-      </button>
+      <button type="submit" className="button-primary">Trimite Comanda</button>
     </form>
   );
 };
